@@ -1,0 +1,68 @@
+#:kivy 1.0
+
+<MainScreen>:
+    BoxLayout:
+        orientation: 'horizontal'
+
+
+<LoginScreen>:
+    AnchorLayout:
+        anchor_x: 'center'
+        anchor_y: 'center'
+        BoxLayout:
+            size_hint: 0.25, 0.2
+            pos: self.parent.pos
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    size_hint: 0.15, None
+                    height: 56
+                    pos_hint: {'y':0.5}
+                    text: 'user'
+                TextInput:
+                    id:username
+                    write_tab: False
+                    multiline: False
+                    size_hint_y: None
+                    height: 56
+                    pos_hint: {'y':0.5}
+                    focus: True
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    size_hint: 0.15, None
+                    height: 56
+                    pos_hint: {'y':0.5}
+                    text: 'pass'
+                TextInput:
+                    id:password
+                    write_tab: False
+                    multiline: False
+                    password: True
+                    size_hint_y: None
+                    height: 56
+                    pos_hint: {'y':0.5}
+            Button:
+                text: 'Log In'
+                pos_hint: {'x':0.2}
+                size_hint: 0.6, 1
+                on_press:
+                    root.bugem(username.text, password.text)
+                    username.text = ''
+                    password.text = ''
+
+
+<BrowserScreen>:
+    AnchorLayout:
+        anchor_x: 'center'
+        anchor_y: 'center'
+        ScrollView:
+            id: scroll
+            do_scroll: False, True
+            size_hint: .5, None
+            GridLayout:
+                id: list
+                cols: 1
+                size_hint: 1, None
+                height: self.minimum_height
