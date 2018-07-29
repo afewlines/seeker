@@ -9,14 +9,15 @@ i don't like google play music's interface, so that's where this spawned
 
 i have a cli gpm playlist-player that hooks up to an rc vlc server, but i'm stalling on that because i'm liking kivy so far
 ### outline of work
-- testing ui so i can operate at a base level
-  - queue display
-  - current song
-  - start playlist
+- ~~testing~~? ui so i can operate at a base level
+  - ~~queue display~~
+  - ~~current song~~
+  - ~~(load) playlist~~
     - possible pause/play
   - next song
   - previous song
   - time readout
+  - progress bar
 
 
 - player interface
