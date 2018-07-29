@@ -4,14 +4,18 @@ from functools import partial
 
 import kivy.metrics as metrics
 from kivy.app import App
+from kivy.clock import Clock
 from kivy.config import Config
 from kivy.core.window import Window
+from kivy.uix.behaviors.button import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import (CardTransition, Screen, ScreenManager,
                                     SlideTransition)
+from kivy.uix.slider import Slider
 from kivy.uix.widget import Widget
 
 from apiinterface import APIInterface as API
@@ -26,7 +30,11 @@ class BackgroundBox(BoxLayout):
     pass
 
 
-class ImageButton(Image, Button):
+class BackgroundGrid(GridLayout):
+    pass
+
+
+class ImageButton(ButtonBehavior, Image):
     pass
 
 
@@ -34,18 +42,51 @@ class EmptyScreen(Screen):
     pass
 
 
+class TimeBar(Slider):
+    def on_touch_down(self, touch):
+        released = super(TimeBar, self).on_touch_down(touch)
+        print(touch)
+        if self.collide_point(*touch.pos):
+            self.is_triggered = True
+            if Queue.VLC.is_playing():
+                Player.SCREENS['main'].timer(mode=False)
+            return False
+
+    def on_touch_up(self, touch):
+        released = super(TimeBar, self).on_touch_up(touch)
+        if self.is_triggered:
+            Player.SCREENS['main'].recv_time_bar()
+            if Queue.VLC.is_playing():
+                Player.SCREENS['main'].timer(mode=True)
+            self.is_triggered = False
+            return False
+
+
 class MainScreen(Screen):
     def on_enter(self):
-        temp = None
+        Queue.MAINSCREEN = self
+        self.active_time_bar = False
+        art = None
         self.ids.scroll.height = Window.height
         if Queue.COUNT > 0:
-            temp = Queue.CONTENTS[0]['art']
-            self.load_info(Queue.CONTENTS[0])
             self.update_queue()
-        self.load_art(temp)
+        self.bar_timer = None
+        self.timer(mode=True)
 
     def on_exit(self):
+        self.timer()
         self.ids.queue.clear_widgets()
+
+    def timer(self, mode=False):
+        if mode:
+            if (not self.bar_timer) or (not self.bar_timer.is_triggered):
+                self.bar_timer = Clock.schedule_interval(
+                    self.update_time_bar, 0.125)
+        else:
+            try:
+                self.bar_timer.cancel()
+            except:
+                print('   ERROR   Error canceling progressbar')
 
     def load_art(self, url=None):
         if url:
@@ -55,21 +96,34 @@ class MainScreen(Screen):
 
     def load_info(self, song=None):
         if song:
+            self.load_art(song['art'])
             self.ids.title.text = song['title']
             self.ids.artist.text = song['artist']
             self.ids.album.text = song['album']
+            while Queue.VLC.get_length() == 0:
+                pass
+            self.ids.time_duration.text = '{}:{:02}'.format(
+                *divmod(int(song['length'] / 1000), 60))
         else:
             pass
 
     def update_queue(self):
         self.ids.queue.clear_widgets()
+        self.load_info(Queue.CONTENTS[0])
         self.ids.queue.add_widget(self.tile_factory(
-            Queue.CONTENTS[0], tile=[1, 1, 1, 0.3]))
-        for num in range(1, len(Queue.CONTENTS[1:])):
+            Queue.CONTENTS[0], tile=[0, 0, 0, 0.75]))
+        for num in range(1, len(Queue.CONTENTS[1:]) + 1):
             self.ids.queue.add_widget(self.tile_factory(Queue.CONTENTS[num]))
-        pass
 
-    def tile_factory(self, song, tile=[0, 0, 0, 0.3]):
+    def update_time_bar(self, dt):
+        self.ids.progress_bar.value = Queue.VLC.get_position() % 1
+        self.ids.time_current.text = '{}:{:02}'.format(
+            *divmod(int(Queue.VLC.get_time() / 1000), 60))
+
+    def recv_time_bar(self, *args):
+        Queue.set_position(self.ids.progress_bar.value)
+
+    def tile_factory(self, song, tile=[0, 0, 0, 0.5]):
         temp = BackgroundBox(orientation='vertical', size_hint=(
             1, None), height=metrics.dp(90), bcolor=tile)
         template = {'size_hint': (1, None),
@@ -84,12 +138,22 @@ class MainScreen(Screen):
             15), **template)
         template['height'] = metrics.dp(30)
         template['text_size'] = (metrics.dp(300), None)
-        template['color'] = [0.6, 0.6, 0.6, 1]
+        template['color'] = [0.8, 0.8, 0.8, 1]
         deco = Label(text=song_deco, font_size=metrics.dp(
             14), **template)
         temp.add_widget(title)
         temp.add_widget(deco)
         return temp
+
+    def control_press(self, *args, mode=None):
+        print('mode: {}'.format(mode))
+        if mode == 0:
+            if Queue.pause_play():
+                self.ids.pauseplay.source = 'graphics/buttons/btn_pause.png'
+            else:
+                self.ids.pauseplay.source = 'graphics/buttons/btn_play.png'
+            return
+        Queue.play(mode)
 
 
 class BrowserScreen(Screen):
@@ -108,7 +172,6 @@ class BrowserScreen(Screen):
             for itr in range(len(playlists)):
                 self.ids.list.add_widget(self.option_factory(
                     playlists[len(playlists) - 1 - itr], 'playlists'))
-                print(itr)
 
     def option_factory(self, target, mode):
         temp = Button(text=target['name'], size_hint=(
@@ -125,7 +188,7 @@ class LoginScreen(Screen):
     def on_enter(self):
         if os.path.isfile('qu.eso'):
             f = open('qu.eso', 'r')
-            print(self.login(*f.read().splitlines()))
+            self.login(*f.read().splitlines())
             f.close()
 
     def login(self, *args):
@@ -174,6 +237,9 @@ class MusicPlayerApp(App):
     def build(self):
         sm = Player()
         return sm.MANAGER
+
+    def on_stop(self):
+        Queue.exit()
 
 
 if __name__ == '__main__':

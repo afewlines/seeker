@@ -9,7 +9,17 @@
             pos: self.pos
             size: self.size
 
-<ImageButton>:
+<BackgroundGrid>:
+    bcolor: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: self.bcolor
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<TimeBar>:
+    is_triggered: False
 
 <EmptyScreen>:
     canvas.before:
@@ -41,6 +51,13 @@
         BoxLayout:
             orientation: 'vertical'
             FloatLayout:
+                padding: dp(10)
+                canvas.before:
+                    Color:
+                        rgba: 0,0,0,0.5
+                    Rectangle:
+                        size: self.width*.95,self.height*.95
+                        pos: self.x+(self.width*.025), self.y+(self.height*.025)
                 AsyncImage:
                     id:album_art
                     allow_stretch: True
@@ -55,54 +72,90 @@
                         id:title
                         text: 'title'
                         font_size: dp(30)
+                        text_size: self.size
+                        halign: 'center'
                     Label:
                         id:artist
                         text: 'artist'
                         font_size: dp(24)
+                        text_size: self.size
+                        halign: 'center'
                     Label:
                         id:album
                         text: 'album'
                         font_size: dp(24)
+                        text_size: self.size
+                        halign: 'center'
                 BoxLayout:
                     size_hint: 0.1, 0.5
             BoxLayout:
                 orientation: 'vertical'
-                Slider:
-                    id:progress_bar
-                    size_hint: 0.6, None
-                    pos_hint: {'center_x':0.5,'center_y':0.5}
-                    height: dp(40)
-                    min: 0
-                    max: 1
-                    value: 0
+                GridLayout:
+                    canvas.before:
+                        Color:
+                            rgba: 0,0,0,0.5
+                        Rectangle:
+                            size: self.width*.95,self.height
+                            pos: self.x+(self.width*.025), self.y
+                    rows: 1
+                    cols: 3
+                    size_hint: 1, None
+                    height: dp(80)
+                    Label:
+                        id:time_current
+                        text: '00:00'
+                        size_hint: None, 1
+                        width: dp(100)
+                        text_size: dp(100), None
+                        halign: 'right'
+                    TimeBar:
+                        id:progress_bar
+                        size_hint: 1, 1
+                        pos_hint: {'center_x':0.5,'center_y':0.5}
+                        min: 0
+                        max: 1
+                        value: 0
+                    Label:
+                        id:time_duration
+                        text: '00:00'
+                        size_hint: None, 1
+                        width: dp(100)
+                        text_size: dp(100), None
+                        halign: 'left'
                 AnchorLayout:
                     anchor_x: 'center'
                     anchor_y: 'center'
                     BackgroundBox:
-                        bcolor: [0,0,0,0.3]
+                        bcolor: [1,1,1,0.5]
                         size_hint: None, None
                         size: dp(450), dp(150)
                         orientation: 'horizontal'
                         pos: self.parent.pos
                         padding: dp(20)
                         spacing: dp(10)
-                        Image:
+                        ImageButton:
                             id:previous
                             allow_stretch: True
                             source: 'graphics/buttons/btn_prev.png'
                             size_hint: 0.8, 0.8
                             pos_hint: {'center_y': 0.5}
-                        Image:
-                            id:playpause
+                            on_press:
+                                root.control_press(mode=-2)
+                        ImageButton:
+                            id:pauseplay
                             allow_stretch: True
                             source: 'graphics/buttons/btn_play.png'
                             size_hint: 1, 1
-                        Image:
+                            on_press:
+                                root.control_press(mode=0)
+                        ImageButton:
                             id:next
                             allow_stretch: True
                             source: 'graphics/buttons/btn_next.png'
                             size_hint: 0.8, 0.8
                             pos_hint: {'center_y': 0.5}
+                            on_press:
+                                root.control_press(mode=2)
 
 <LoginScreen>:
     canvas.before:
@@ -119,7 +172,7 @@
             orientation: 'vertical'
             padding: dp(20)
             spacing: dp(10)
-            bcolor: [0,0,0,0.3]
+            bcolor: [0,0,0,0.5]
             BoxLayout:
                 size_hint: 1, 1
                 orientation: 'horizontal'
