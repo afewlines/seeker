@@ -1,59 +1,192 @@
 #:kivy 1.0
 
+<BackgroundBox>:
+    bcolor: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: self.bcolor
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<ImageButton>:
+
+<EmptyScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'graphics/bkg.png'
+
 <MainScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'graphics/bkg.png'
     BoxLayout:
         orientation: 'horizontal'
-
+        ScrollView:
+            id: scroll
+            do_scroll: False, True
+            size_hint: None, None
+            width: dp(350)
+            GridLayout:
+                id: queue
+                cols: 1
+                size_hint: 1, None
+                padding: dp(20)
+                spacing: dp(4)
+                height: self.minimum_height
+        BoxLayout:
+            orientation: 'vertical'
+            FloatLayout:
+                AsyncImage:
+                    id:album_art
+                    allow_stretch: True
+                    source: 'https://i.kym-cdn.com/photos/images/newsfeed/000/627/705/07a.jpg'
+                    size_hint: 1,0.9
+                    pos_hint: {'center_x':0.25, 'center_y':0.5}
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint: 0.4, 0.5
+                    pos_hint: {'x':0.5, 'center_y':0.5}
+                    Label:
+                        id:title
+                        text: 'title'
+                        font_size: dp(30)
+                    Label:
+                        id:artist
+                        text: 'artist'
+                        font_size: dp(24)
+                    Label:
+                        id:album
+                        text: 'album'
+                        font_size: dp(24)
+                BoxLayout:
+                    size_hint: 0.1, 0.5
+            BoxLayout:
+                orientation: 'vertical'
+                Slider:
+                    id:progress_bar
+                    size_hint: 0.6, None
+                    pos_hint: {'center_x':0.5,'center_y':0.5}
+                    height: dp(40)
+                    min: 0
+                    max: 1
+                    value: 0
+                AnchorLayout:
+                    anchor_x: 'center'
+                    anchor_y: 'center'
+                    BackgroundBox:
+                        bcolor: [0,0,0,0.3]
+                        size_hint: None, None
+                        size: dp(450), dp(150)
+                        orientation: 'horizontal'
+                        pos: self.parent.pos
+                        padding: dp(20)
+                        spacing: dp(10)
+                        Image:
+                            id:previous
+                            allow_stretch: True
+                            source: 'graphics/buttons/btn_prev.png'
+                            size_hint: 0.8, 0.8
+                            pos_hint: {'center_y': 0.5}
+                        Image:
+                            id:playpause
+                            allow_stretch: True
+                            source: 'graphics/buttons/btn_play.png'
+                            size_hint: 1, 1
+                        Image:
+                            id:next
+                            allow_stretch: True
+                            source: 'graphics/buttons/btn_next.png'
+                            size_hint: 0.8, 0.8
+                            pos_hint: {'center_y': 0.5}
 
 <LoginScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'graphics/bkg.png'
     AnchorLayout:
         anchor_x: 'center'
         anchor_y: 'center'
-        BoxLayout:
-            size_hint: 0.25, 0.2
+        BackgroundBox:
+            size_hint: 0.25, 0.25
             pos: self.parent.pos
             orientation: 'vertical'
+            padding: dp(20)
+            spacing: dp(10)
+            bcolor: [0,0,0,0.3]
             BoxLayout:
+                size_hint: 1, 1
                 orientation: 'horizontal'
-                Label:
-                    size_hint: 0.15, None
-                    height: 56
-                    pos_hint: {'y':0.5}
-                    text: 'user'
-                TextInput:
-                    id:username
-                    write_tab: False
-                    multiline: False
-                    size_hint_y: None
-                    height: 56
-                    pos_hint: {'y':0.5}
-                    focus: True
-            BoxLayout:
-                orientation: 'horizontal'
-                Label:
-                    size_hint: 0.15, None
-                    height: 56
-                    pos_hint: {'y':0.5}
-                    text: 'pass'
-                TextInput:
-                    id:password
-                    write_tab: False
-                    multiline: False
-                    password: True
-                    size_hint_y: None
-                    height: 56
-                    pos_hint: {'y':0.5}
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint: None,1
+                    width: dp(50)
+                    spacing: dp(10)
+                    Label:
+                        size_hint: None, None
+                        width: dp(50)
+                        height: dp(30)
+                        text_size: None, dp(24)
+                        pos_hint: {'y':0.5}
+                        font_size: dp(15)
+                        valign: 'center'
+                        halign: 'left'
+                        text: 'User '
+                    Label:
+                        size_hint: None, None
+                        width: dp(50)
+                        height: dp(30)
+                        text_size: None, dp(24)
+                        pos_hint: {'y':0.5}
+                        font_size: dp(15)
+                        valign: 'center'
+                        halign: 'left'
+                        text: 'Pass '
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(10)
+                    TextInput:
+                        id:username
+                        write_tab: False
+                        multiline: False
+                        size_hint_y: None
+                        height: dp(30)
+                        font_size: dp(15)
+                        pos_hint: {'y':0.5}
+                        focus: True
+                    TextInput:
+                        id:password
+                        write_tab: False
+                        multiline: False
+                        password: True
+                        size_hint_y: None
+                        font_size: dp(15)
+                        height: dp(30)
+                        pos_hint: {'y':0.5}
             Button:
                 text: 'Log In'
-                pos_hint: {'x':0.2}
-                size_hint: 0.6, 1
+                font_size: dp(16)
+                pos_hint: {'center_x':0.5}
+                size_hint: 0.4, None
+                height: dp(40)
                 on_press:
-                    root.bugem(username.text, password.text)
+                    root.login(username.text, password.text)
                     username.text = ''
                     password.text = ''
 
-
 <BrowserScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'graphics/bkg.png'
     AnchorLayout:
         anchor_x: 'center'
         anchor_y: 'center'

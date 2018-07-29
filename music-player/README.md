@@ -1,9 +1,10 @@
 # seeker-music
 
-uses gmusicapi and kivy
+uses gmusicapi, vlc, and kivy
+
 will be adding requirement file as soon as i figure it out
 
-
+font is 'gravity,' license is in upload
 
 
 
@@ -21,3 +22,9 @@ username
 password
 
 android id
+
+## select your playlist
+pretty simple, you can figure it out
+
+## view the media!
+sometimes it feelsbadman
