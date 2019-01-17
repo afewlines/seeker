@@ -16,10 +16,12 @@ class Queue:
     VLC = VLCINSTANCE.media_player_new()
     TIMER = None
 
+    @staticmethod
     def exit():
         Queue.timer_stop()
         Queue.VLC.stop()
 
+    @staticmethod
     def load(category, target, *args):
         if category == 'playlists':
             for entry in [song for song in target['tracks'] if song['source'] == '2']:
@@ -35,15 +37,31 @@ class Queue:
                 Queue.COUNT, ('s' if Queue.COUNT != 1 else '')))
             shuffle(Queue.CONTENTS)
 
+        elif category == 'stations':
+            info = API.API.get_station_info(target['id'], num_tracks=50)
+            for entry in [song for song in info['tracks']]:
+                Queue.CONTENTS.append({'title': entry['title'],
+                                       'artist': entry['artist'],
+                                       'album': entry['album'],
+                                       'id': entry['storeId'],
+                                       'length': int(entry['durationMillis']),
+                                       'art': entry['albumArtRef'][0]['url']})
+                Queue.COUNT += 1
+            print('{} song{} added to queue'.format(
+                Queue.COUNT, ('s' if Queue.COUNT != 1 else '')))
+            shuffle(Queue.CONTENTS)
+
         # load first song
         Queue.load_song(Queue.CONTENTS[0])
 
+    @staticmethod
     def timer_stop():
         try:
             Queue.TIMER.cancel()
         except:
             print(' FAILED TO STOP TIMER')
 
+    @staticmethod
     def timer_start():
         # pause until song is loaded
         while Queue.VLC.get_length() == 0:
@@ -52,6 +70,7 @@ class Queue:
         Queue.TIMER = Timer(a, partial(Queue.play, 2))
         Queue.TIMER.start()
 
+    @staticmethod
     def load_song(target):
         url = API.API.get_stream_url(target['id'])
         song = Queue.VLCINSTANCE.media_new(url)
@@ -59,6 +78,7 @@ class Queue:
         Queue.VLC.set_media(song)
         song.parse()
 
+    @staticmethod
     def play(mode):
         print(mode, type(mode))
         if mode > 1:
@@ -88,6 +108,7 @@ class Queue:
 
         Queue.MAINSCREEN.update_queue()
 
+    @staticmethod
     def pause_play():
         if Queue.VLC.is_playing():
             Queue.timer_stop()
@@ -97,6 +118,7 @@ class Queue:
             Queue.play(0)
             return True
 
+    @staticmethod
     def set_position(pos):
         if Queue.VLC.is_playing():
             Queue.timer_stop()

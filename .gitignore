@@ -2,3 +2,5 @@
 *.eso
 *pycache*
 /resources
+/grabber
+/config_tests

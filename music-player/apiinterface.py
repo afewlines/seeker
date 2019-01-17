@@ -4,6 +4,7 @@ from gmusicapi import Mobileclient
 class APIInterface:
     API = None
 
+    @staticmethod
     def login(user, passwd, and_id=None):
         APIInterface.API = Mobileclient(debug_logging=True)
         if not and_id:

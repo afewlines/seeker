@@ -30,15 +30,17 @@
 
 <MainScreen>:
     canvas.before:
-        Rectangle:
+        BorderImage:
             pos: self.pos
             size: self.size
+            auto_scale: 'x_only'
             source: 'graphics/bkg.png'
     BoxLayout:
         orientation: 'horizontal'
         ScrollView:
             id: scroll
             do_scroll: False, True
+            scroll_timeout: 256
             size_hint: None, None
             width: dp(350)
             GridLayout:
@@ -50,8 +52,9 @@
                 height: self.minimum_height
         BoxLayout:
             orientation: 'vertical'
-            FloatLayout:
-                padding: dp(10)
+            BoxLayout:
+                orientation: 'horizontal'
+                padding: (self.height+self.width)/32
                 canvas.before:
                     Color:
                         rgba: 0,0,0,0.5
@@ -59,35 +62,44 @@
                         size: self.width*.95,self.height*.95
                         pos: self.x+(self.width*.025), self.y+(self.height*.025)
                 AsyncImage:
-                    id:album_art
+                    id: album_art
                     allow_stretch: True
                     source: 'https://i.kym-cdn.com/photos/images/newsfeed/000/627/705/07a.jpg'
-                    size_hint: 1,0.9
-                    pos_hint: {'center_x':0.25, 'center_y':0.5}
+                    size_hint: 0.4,1
+                    pos_hint: {'center_x':0.5, 'center_y':0.5}
                 BoxLayout:
+                    id: infobox
                     orientation: 'vertical'
-                    size_hint: 0.4, 0.5
-                    pos_hint: {'x':0.5, 'center_y':0.5}
+                    size_hint: 0.6, 0.5
+                    spacing: dp(5)
+                    pos_hint: {'center_x':0.5, 'center_y':0.5}
                     Label:
                         id:title
                         text: 'title'
+                        size_hint: None, None
+                        size: self.parent.width, self.parent.height*(2.0/3.0)
                         font_size: dp(30)
                         text_size: self.size
                         halign: 'center'
+                        valign: 'center'
                     Label:
                         id:artist
                         text: 'artist'
-                        font_size: dp(24)
+                        size_hint: None, None
+                        size: self.parent.width, self.parent.height*(1.0/6.0)
+                        font_size: dp(16)
                         text_size: self.size
                         halign: 'center'
+                        valign: 'center'
                     Label:
                         id:album
                         text: 'album'
-                        font_size: dp(24)
+                        size_hint: None, None
+                        size: self.parent.width, self.parent.height*(1.0/6.0)
+                        font_size: dp(16)
                         text_size: self.size
                         halign: 'center'
-                BoxLayout:
-                    size_hint: 0.1, 0.5
+                        valign: 'center'
             BoxLayout:
                 orientation: 'vertical'
                 GridLayout:
@@ -126,9 +138,9 @@
                     anchor_x: 'center'
                     anchor_y: 'center'
                     BackgroundBox:
-                        bcolor: [1,1,1,0.5]
-                        size_hint: None, None
-                        size: dp(450), dp(150)
+                        bcolor: [0,0,0,0.5]
+                        size_hint: 0.95, 0.5
+                        size: 0, dp(150)
                         orientation: 'horizontal'
                         pos: self.parent.pos
                         padding: dp(20)

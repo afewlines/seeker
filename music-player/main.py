@@ -24,6 +24,7 @@ from musicqueue import Queue
 
 class BROWSETYPE(Enum):
     playlists = auto()
+    stations = auto()
 
 
 class BackgroundBox(BoxLayout):
@@ -68,6 +69,7 @@ class MainScreen(Screen):
         self.active_time_bar = False
         art = None
         self.ids.scroll.height = Window.height
+        Window.bind(size=self.on_resize)
         if Queue.COUNT > 0:
             self.update_queue()
         self.bar_timer = None
@@ -76,6 +78,18 @@ class MainScreen(Screen):
     def on_exit(self):
         self.timer()
         self.ids.queue.clear_widgets()
+
+    def on_resize(self, *args):
+        self.ids.scroll.height = Window.height
+        #print('art size', art.size, art.size_hint)
+        if args[1][0] < args[1][1]:
+            self.ids.album_art.size_hint = [1, 0.5]
+            self.ids.infobox.size_hint = [0.9, 0.5]
+            self.ids.album_art.parent.orientation = 'vertical'
+        else:
+            self.ids.album_art.size_hint = [0.4, 1]
+            self.ids.infobox.size_hint = [0.6, 0.6]
+            self.ids.album_art.parent.orientation = 'horizontal'
 
     def timer(self, mode=False):
         if mode:
@@ -89,10 +103,12 @@ class MainScreen(Screen):
                 print('   ERROR   Error canceling progressbar')
 
     def load_art(self, url=None):
+        art = self.ids.album_art
+
         if url:
-            self.ids.album_art.source = url
+            art.source = url
         else:
-            self.ids.album_art.source = 'https://res.cloudinary.com/teepublic/image/private/s--HPkOGViW--/t_Preview/b_rgb:ffffff,c_limit,f_jpg,h_630,q_90,w_630/v1524084094/production/designs/2603700_0.jpg'
+            art.source = 'https://res.cloudinary.com/teepublic/image/private/s--HPkOGViW--/t_Preview/b_rgb:ffffff,c_limit,f_jpg,h_630,q_90,w_630/v1524084094/production/designs/2603700_0.jpg'
 
     def load_info(self, song=None):
         if song:
@@ -157,7 +173,7 @@ class MainScreen(Screen):
 
 
 class BrowserScreen(Screen):
-    MODE = BROWSETYPE.playlists
+    MODE = BROWSETYPE.stations
 
     def on_enter(self):
         self.populate()
@@ -165,13 +181,23 @@ class BrowserScreen(Screen):
     def on_exit(self):
         self.ids.list.clear_widgets()
 
+    def on_resize(self, *args):
+        self.ids.scroll.height = Window.height * 0.8
+
     def populate(self):
+        self.ids.scroll.height = Window.height * 0.8
+        Window.bind(height=self.on_resize)
         if BrowserScreen.MODE == BROWSETYPE.playlists:
-            self.ids.scroll.height = Window.height * 0.8
             playlists = API.API.get_all_user_playlist_contents()
             for itr in range(len(playlists)):
                 self.ids.list.add_widget(self.option_factory(
-                    playlists[len(playlists) - 1 - itr], 'playlists'))
+                    playlists[len(playlists) - itr - 1], 'playlists'))
+
+        if BrowserScreen.MODE == BROWSETYPE.stations:
+            stations = API.API.get_all_stations()
+            for itr in range(len(stations)):
+                self.ids.list.add_widget(self.option_factory(
+                    stations[len(stations) - itr - 1], 'stations'))
 
     def option_factory(self, target, mode):
         temp = Button(text=target['name'], size_hint=(
@@ -217,7 +243,6 @@ class Player:
 
         Player.change_screen(
             'login', t=CardTransition(direction='down', mode='push', duration=1))
-        BrowserScreen.MODE = BROWSETYPE.playlists
 
     def change_screen(target, *args, t=None):
 
@@ -246,6 +271,5 @@ if __name__ == '__main__':
     # Config.set('graphics', 'borderless', '1')
     Config.set('graphics', 'width', '1280')
     Config.set('graphics', 'height', '720')
-    Config.set('graphics', 'resizable', '0')
     Config.write()
     MusicPlayerApp().run()
